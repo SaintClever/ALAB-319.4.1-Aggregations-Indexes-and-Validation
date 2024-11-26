@@ -133,4 +133,13 @@ router.delete("/class/:id", async (req, res) => {
   else res.send(result).status(200);
 });
 
+// Get Stats
+router.get("/stats", async (req, res) => {
+  let collection = await db.collection("grades");
+  let result = await collection.find();
+
+  if (!result) res.send("Not found").status(404);
+  else res.send(result).status(200);
+});
+
 export default router;

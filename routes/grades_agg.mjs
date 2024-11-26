@@ -75,6 +75,11 @@ router.get("/learner/:id/avg-class", async (req, res) => {
           },
         },
       },
+      {
+        $group: {
+          _id: "$_id", averageOverSeventy: { $avg: "$scores.score" }
+        }
+      }
     ])
     .toArray();
 
