@@ -4,6 +4,34 @@ import { ObjectId } from "mongodb";
 
 const router = express.Router();
 
+
+// Get Stats
+// http://localhost:5050/grades/56d5f7eb604eb380b0d8d8d5
+
+router.get("/stats", async (req, res) => {
+  let collection = await db.collection("grades");
+  let result = await collection.find([
+    {
+      $match: {
+        "scores.score": { $gte: 70 }
+      }
+    }
+  ]);
+
+  if (!result) res.send("Not found").status(404);
+  else res.send(result).status(200);
+});
+
+
+router.get("stats/:id", async (req, res) => {
+  let collection = await db.collection("grades");
+  let query = { _id: ObjectId(req.params.id) };
+  let result = await collection.findOne(query);
+
+  if (!result) res.send("Not found").status(404);
+  else res.send(result).status(200);
+});
+
 // Create a single grade entry
 router.post("/", async (req, res) => {
   let collection = await db.collection("grades");
@@ -128,15 +156,6 @@ router.delete("/class/:id", async (req, res) => {
   let query = { class_id: Number(req.params.id) };
 
   let result = await collection.deleteMany(query);
-
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
-});
-
-// Get Stats
-router.get("/stats", async (req, res) => {
-  let collection = await db.collection("grades");
-  let result = await collection.find();
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
