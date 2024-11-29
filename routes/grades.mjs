@@ -10,16 +10,26 @@ const router = express.Router();
 
 router.get("/stats", async (req, res) => {
   let collection = await db.collection("grades");
-  let result = await collection.find([
-    {
-      $match: {
-        "scores.score": { $gte: 70 }
-      }
-    }
-  ]);
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  // Greater than 70
+  let greaterThan70 = [
+    { $unwind: "$scores" },
+    { $group: 
+      { _id: "$learner_id", 
+         averageScore: { $avg: "$scores.score" }
+      }
+    },
+    {
+      $match: { averageScore: { $gt: 50 } } // Change 70 to 50 to see a different result
+    }
+  ];
+
+  // let result = await collection.find().limit(5).toArray();
+  let result = await collection.aggregate(greaterThan70).toArray();
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
 });
 
 
