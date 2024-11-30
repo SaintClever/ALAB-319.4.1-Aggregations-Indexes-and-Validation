@@ -154,8 +154,9 @@ router.get("/stats/average", async (req, res) => {
   let greaterThan = [
     { $unwind: "$scores" },
     { $group: 
-      { _id: "$learner_id", 
-         averageScore: { $avg: "$scores.score" }
+      { 
+        _id: "$learner_id", 
+        averageScore: { $avg: "$scores.score" }
       }
     },
     {
@@ -170,17 +171,34 @@ router.get("/stats/average", async (req, res) => {
   // else res.send(result).status(200);
 });
 
-
 // The total number of learners
 router.get("/stats/learnercount", async(req, res) => {
   let collection = db.collection("grades");
-  let leanerCount = [{ $count: "learner_id" }];
+  let leanerCount = [{ $count: "leanerCount" }];
   let result = await collection.aggregate(leanerCount).toArray();
   res.json(result);
 
   // if (!result) res.send("Not found").status(404);
   // else res.send(result).status(200);
-})
+});
+
+// Find class_id
+router.get("/stats/:id", async (req, res) => {
+  let collection = db.collection("grades");
+  let query = [
+    {
+      $match: {
+        "class_id": { $eq: Number(req.params.id) }
+      }
+    }
+  ];
+
+  let result = await collection.aggregate(query).toArray();
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+});
 
 
 export default router;
