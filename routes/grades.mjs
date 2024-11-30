@@ -8,31 +8,6 @@ const router = express.Router();
 // Get Stats
 // http://localhost:5050/grades/56d5f7eb604eb380b0d8d8d5
 
-router.get("/stats", async (req, res) => {
-  let collection = await db.collection("grades");
-
-  // Greater than 70
-  let greaterThan70 = [
-    { $unwind: "$scores" },
-    { $group: 
-      { _id: "$learner_id", 
-         averageScore: { $avg: "$scores.score" }
-      }
-    },
-    {
-      $match: { averageScore: { $gt: 50 } } // Change 70 to 50 to see a different result
-    }
-  ];
-
-  // let result = await collection.find().limit(5).toArray();
-  let result = await collection.aggregate(greaterThan70).toArray();
-  res.json(result);
-
-  // if (!result) res.send("Not found").status(404);
-  // else res.send(result).status(200);
-});
-
-
 router.get("stats/:id", async (req, res) => {
   let collection = await db.collection("grades");
   let query = { _id: ObjectId(req.params.id) };
@@ -170,5 +145,42 @@ router.delete("/class/:id", async (req, res) => {
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
 });
+
+// Get greater than 70 
+router.get("/stats/average", async (req, res) => {
+  let collection = db.collection("grades");
+
+  // Change 70 to 50 to see a different result
+  let greaterThan = [
+    { $unwind: "$scores" },
+    { $group: 
+      { _id: "$learner_id", 
+         averageScore: { $avg: "$scores.score" }
+      }
+    },
+    {
+      $match: { averageScore: { $gte: 70 } }
+    }
+  ];
+
+  let result = await collection.aggregate(greaterThan).toArray(); 
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+});
+
+
+// The total number of learners
+router.get("/stats/learnercount", async(req, res) => {
+  let collection = db.collection("grades");
+  let leanerCount = [{ $count: "learner_id" }];
+  let result = await collection.aggregate(leanerCount).toArray();
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+})
+
 
 export default router;
