@@ -24,7 +24,6 @@ router.get("/stats/average", async (req, res) => {
   ];
 
   let result = await collection.aggregate(greaterThan).toArray(); 
-  res.json(result);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
@@ -35,7 +34,6 @@ router.get("/stats/learnercount", async(req, res) => {
   let collection = db.collection("grades");
   let leanerCount = [{ $count: "leanerCount" }];
   let result = await collection.aggregate(leanerCount).toArray();
-  res.json(result);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
@@ -53,7 +51,6 @@ router.get("/stats/:id", async (req, res) => {
   ];
 
   let result = await collection.aggregate(query).toArray();
-  res.json(result);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
