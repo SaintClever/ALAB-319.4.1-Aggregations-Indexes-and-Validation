@@ -4,6 +4,70 @@ import { ObjectId } from "mongodb";
 
 const router = express.Router();
 
+
+// Get greater than 70 
+router.get("/stats/average", async (req, res) => {
+  let collection = db.collection("grades");
+
+  // Change 70 to 50 to see a different result
+  let greaterThan = [
+    { $unwind: "$scores" },
+    { $group: 
+      { 
+        _id: "$learner_id", 
+        averageScore: { $avg: "$scores.score" }
+      }
+    },
+    {
+      $match: { averageScore: { $gte: 70 } }
+    }
+  ];
+
+  let result = await collection.aggregate(greaterThan).toArray(); 
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+});
+
+// The total number of learners
+router.get("/stats/learnercount", async(req, res) => {
+  let collection = db.collection("grades");
+  let leanerCount = [{ $count: "leanerCount" }];
+  let result = await collection.aggregate(leanerCount).toArray();
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+});
+
+// Find class_id
+router.get("/stats/:id", async (req, res) => {
+  let collection = db.collection("grades");
+  let query = [
+    {
+      $match: {
+        "class_id": { $eq: Number(req.params.id) }
+      }
+    }
+  ];
+
+  let result = await collection.aggregate(query).toArray();
+  res.json(result);
+
+  // if (!result) res.send("Not found").status(404);
+  // else res.send(result).status(200);
+});
+
+router.get("stats/:id", async (req, res) => {
+  let collection = await db.collection("grades");
+  let query = { _id: ObjectId(req.params.id) };
+  let result = await collection.findOne(query);
+
+  if (!result) res.send("Not found").status(404);
+  else res.send(result).status(200);
+});
+
 /**
  * It is not best practice to seperate these routes
  * like we have done here. This file was created
